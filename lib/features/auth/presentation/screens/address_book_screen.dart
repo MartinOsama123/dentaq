@@ -243,10 +243,10 @@ class _AddressBookScreenState extends ConsumerState<AddressBookScreen> {
                 // City ID
                 _buildTextField(
                   controller: _cityController,
-                  label: 'City ID',
+                  label: 'City',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter city ID';
+                      return 'Please enter city';
                     }
                     return null;
                   },
@@ -271,10 +271,10 @@ class _AddressBookScreenState extends ConsumerState<AddressBookScreen> {
                 // Area ID
                 _buildTextField(
                   controller: _areaController,
-                  label: 'Area ID',
+                  label: 'Area',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter area ID';
+                      return 'Please enter area';
                     }
                     return null;
                   },
@@ -300,24 +300,34 @@ class _AddressBookScreenState extends ConsumerState<AddressBookScreen> {
                 // Buttons Row
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
+                    /*  Expanded(
+                      child: ElevatedButton(
                         onPressed: _handleCancel,
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppTheme.textColor),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: BorderSide(color: Colors.red),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(40),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: AppTheme.textColor,
-                            fontSize: 16,
+                            color: Colors.red,
+                            fontSize: 20,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),
+                    ), */
+                    Expanded(
+                      child: CustomButton(
+                        text: 'Cancel',
+                        onPressed: _handleCancel,
+                        height: 60,
+                        borderRadius: 40,
+                        fontSize: 20,
+                        destructive: true,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -326,7 +336,9 @@ class _AddressBookScreenState extends ConsumerState<AddressBookScreen> {
                         text: 'Save Address',
                         onPressed: _handleSave,
                         isLoading: _isLoading,
-                        height: 48,
+                        height: 60,
+                        borderRadius: 40,
+                        fontSize: 20,
                       ),
                     ),
                   ],

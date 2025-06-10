@@ -1,3 +1,4 @@
+import 'package:dentaq/core/utils/dialog_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -307,7 +308,7 @@ class _UserDashboardScreenState extends ConsumerState<UserDashboardScreen>
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     // Show confirmation dialog
-    final confirmed = await showDialog<bool>(
+    /*   final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Logout'),
@@ -324,8 +325,14 @@ class _UserDashboardScreenState extends ConsumerState<UserDashboardScreen>
           ),
         ],
       ),
+    ); */
+    final confirmed = await DialogUtils.showConfirmationDialog(
+      context: context,
+      title: 'Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
     );
-
     if (confirmed == true && context.mounted) {
       try {
         await AuthUtils.logout();

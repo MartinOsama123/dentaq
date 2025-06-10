@@ -1,4 +1,6 @@
 import 'package:dentaq/core/theme/app_theme.dart';
+import 'package:dentaq/core/utils/dialog_utils.dart';
+import 'package:dentaq/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,6 +79,21 @@ class CartScreen extends ConsumerWidget {
         ),
         _buildDiscountSection(ref),
         _buildTotalSection(subtotal, discountAmount, total),
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor,
+            border: Border.all(color: AppTheme.textColor),
+          ),
+          child: const Text(
+            'Due to the Egyptian market situation, prices and the availability of the products your ordered will be confirmed by our customer support call after your order is placed successfully.',
+            style: TextStyle(
+              color: AppTheme.textColor,
+              fontSize: 16,
+            ),
+          ),
+        ),
         _buildCheckoutButton(context),
       ],
     );
@@ -155,7 +172,7 @@ class CartScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFA2E3DF),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppTheme.textColor),
       ),
       child: Column(
         children: [
@@ -170,7 +187,7 @@ class CartScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                '\$${subtotal.toStringAsFixed(2)}',
+                '${subtotal.toStringAsFixed(2)} EGP',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -192,7 +209,7 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '-\$${discountAmount.toStringAsFixed(2)}',
+                  '-${discountAmount.toStringAsFixed(2)} EGP',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -215,7 +232,7 @@ class CartScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                '\$${total.toStringAsFixed(2)}',
+                '${total.toStringAsFixed(2)} EGP',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -230,31 +247,17 @@ class CartScreen extends ConsumerWidget {
   }
 
   Widget _buildCheckoutButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.all(16),
-      child: ElevatedButton(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: CustomButton(
         onPressed: () {
-          // Navigate to checkout screen (placeholder)
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Proceeding to checkout...'),
-              backgroundColor: Colors.blue,
-            ),
-          );
+          context.push('/checkout');
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF044D5E),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: const Text(
-          'Proceed to Checkout',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        text: 'Proceed to Checkout',
+        borderRadius: 40,
+        height: 55,
+        width: double.infinity,
+        fontSize: 20,
       ),
     );
   }
@@ -272,9 +275,10 @@ class _CartItemCard extends ConsumerWidget {
     final totalPrice = price * quantity;
 
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.textColor),
-        borderRadius: BorderRadius.circular(8),
+      decoration: const BoxDecoration(
+        border: Border.symmetric(
+          horizontal: BorderSide(color: AppTheme.textColor),
+        ),
       ),
       child: Column(
         children: [
@@ -297,7 +301,7 @@ class _CartItemCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Remove from cart button
-                    InkWell(
+                    /*   InkWell(
                       onTap: () async {
                         if (product.id != null) {
                           try {
@@ -335,7 +339,7 @@ class _CartItemCard extends ConsumerWidget {
                         child: const Icon(Icons.delete,
                             color: Colors.red, size: 20),
                       ),
-                    ),
+                    ), */
                     // Product image
                     Expanded(
                       flex: 2,
@@ -378,7 +382,7 @@ class _CartItemCard extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Unit Price: \$${price.toStringAsFixed(2)}',
+                            'Unit Price: ${price.toStringAsFixed(2)} EGP',
                             style: const TextStyle(
                               color: AppTheme.textColor,
                               fontSize: 14,
@@ -393,7 +397,7 @@ class _CartItemCard extends ConsumerWidget {
               ],
             ),
           ),
-          const Divider(color: AppTheme.textColor, height: 1),
+
           // Quantity controls and total price
           Container(
             padding: const EdgeInsets.all(16),
@@ -401,7 +405,7 @@ class _CartItemCard extends ConsumerWidget {
               children: [
                 // Quantity controls
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: AppTheme.textColor),
@@ -412,16 +416,30 @@ class _CartItemCard extends ConsumerWidget {
                       children: [
                         // Minus button
                         IconButton(
-                          onPressed: quantity > 1
-                              ? () async {
-                                  if (product.id != null) {
-                                    await ref.read(updateCartQuantityProvider((
-                                      productId: product.id!,
-                                      quantity: quantity - 1
-                                    )).future);
+                          onPressed: () async {
+                            if (product.id != null) {
+                              if (quantity == 1) {
+                                try {
+                                  await ref.read(
+                                      removeFromCartProvider(product.id!)
+                                          .future);
+                                  if (context.mounted) {
+                                    DialogUtils.showSuccessSnackbar(
+                                      context: context,
+                                      message: 'Item removed from cart',
+                                    );
                                   }
+                                } catch (e) {
+                                  if (context.mounted) {}
                                 }
-                              : null,
+                              } else {
+                                await ref.read(updateCartQuantityProvider((
+                                  productId: product.id!,
+                                  quantity: quantity - 1
+                                )).future);
+                              }
+                            }
+                          },
                           icon: const Icon(Icons.remove),
                           style: IconButton.styleFrom(
                             minimumSize: const Size(40, 40),
@@ -452,6 +470,7 @@ class _CartItemCard extends ConsumerWidget {
                           width: 1,
                           color: Colors.grey,
                         ),
+
                         // Plus button
                         IconButton(
                           onPressed: () async {
@@ -474,22 +493,14 @@ class _CartItemCard extends ConsumerWidget {
                 const SizedBox(width: 16),
                 // Total price
                 Expanded(
-                  flex: 1,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFA2E3DF),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '\$${totalPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: AppTheme.textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                  flex: 2,
+                  child: Text(
+                    '${totalPrice.toStringAsFixed(2)} EGP',
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      color: AppTheme.textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
                     ),
                   ),
                 ),

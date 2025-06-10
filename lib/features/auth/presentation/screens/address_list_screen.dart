@@ -144,7 +144,7 @@ class _AddressListScreenState extends ConsumerState<AddressListScreen> {
             const SizedBox(height: 16),
 
             // Address List
-            Expanded(
+            Flexible(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _addresses.isEmpty
@@ -180,6 +180,7 @@ class _AddressListScreenState extends ConsumerState<AddressListScreen> {
                         )
                       : ListView.separated(
                           itemCount: _addresses.length,
+                          shrinkWrap: true,
                           separatorBuilder: (context, index) => Divider(
                             height: 1,
                             thickness: 1,
@@ -194,12 +195,13 @@ class _AddressListScreenState extends ConsumerState<AddressListScreen> {
 
             const SizedBox(height: 16),
 
-            // Add New Address Button
             CustomButton(
               text: 'Add New Address',
               onPressed: _navigateToAddAddress,
               width: double.infinity,
               height: 48,
+              borderRadius: 40,
+              fontSize: 20,
             ),
 
             const SizedBox(height: 16),
@@ -212,71 +214,96 @@ class _AddressListScreenState extends ConsumerState<AddressListScreen> {
   Widget _buildAddressCard(Address address) {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          // Address Title and Actions
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Address Title and Actions
+                /*  Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: 
+                    ),
+                  /*   Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: AppTheme.textColor),
+                          onPressed: () => _navigateToEditAddress(address),
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _showDeleteDialog(address),
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ), */
+                  ],
+                ), */
+                Text(
                   address.title,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textColor,
+                    color: Colors.black,
                   ),
                 ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: AppTheme.textColor),
-                    onPressed: () => _navigateToEditAddress(address),
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _showDeleteDialog(address),
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                const SizedBox(height: 16),
 
-          const SizedBox(height: 8),
+                // Address Details
+                Text(
+                  '${address.streetName} ${address.buildingNumber}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
 
-          // Address Details
-          Text(
-            '${address.streetName} ${address.buildingNumber}',
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppTheme.textColor,
+                const SizedBox(height: 16),
+
+                Text(
+                  'Floor ${address.floor}, Apartment ${address.apartment}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  '${address.country} - Postal Code: ${address.cityPostalCode}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                InkWell(
+                  onTap: () => _navigateToEditAddress(address),
+                  child: Text(
+                    'Edit Address',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontSize: 14,
+                      color: AppTheme.textColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            'Floor ${address.floor}, Apartment ${address.apartment}',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textColor.withOpacity(0.7),
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            '${address.country} - Postal Code: ${address.cityPostalCode}',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textColor.withOpacity(0.7),
+          Expanded(
+            child: Image.asset(
+              'assets/images/gps_temp.png',
+              fit: BoxFit.cover,
             ),
           ),
         ],

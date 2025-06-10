@@ -48,6 +48,18 @@ class AppTheme {
         bodyMedium: TextStyle(color: textColor),
         titleLarge: TextStyle(color: textColor),
       ),
+      radioTheme: RadioThemeData(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return textColor;
+          }
+          return textColor;
+        }),
+        overlayColor: MaterialStateProperty.all(textColor.withOpacity(0.1)),
+        splashRadius: 20,
+      ),
     );
   }
 
@@ -93,6 +105,18 @@ class AppTheme {
         bodyLarge: TextStyle(color: textColor),
         bodyMedium: TextStyle(color: textColor),
         titleLarge: TextStyle(color: textColor),
+      ),
+      radioTheme: RadioThemeData(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return textColor;
+          }
+          return Colors.transparent;
+        }),
+        overlayColor: MaterialStateProperty.all(textColor.withOpacity(0.1)),
+        splashRadius: 20,
       ),
     );
   }
