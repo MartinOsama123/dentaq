@@ -15,8 +15,6 @@ class NavigationScreen extends StatefulWidget {
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  int _currentIndex = 0;
-
   final List<String> _routes = [
     '/products',
     '/cart',
@@ -31,18 +29,29 @@ class _NavigationScreenState extends State<NavigationScreen> {
     'Account',
   ];
 
+  int _getCurrentIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+
+    // Find which route matches the current location
+    for (int i = 0; i < _routes.length; i++) {
+      if (location.startsWith(_routes[i])) {
+        return i;
+      }
+    }
+    return 0; // Default to products if no match
+  }
+
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
     context.go(_routes[index]);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = _getCurrentIndex(context);
+
     return Scaffold(
       appBar: CustomAppBar(
-        title: _titles[_currentIndex],
+        title: _titles[currentIndex],
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -52,7 +61,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       ),
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         items: const [

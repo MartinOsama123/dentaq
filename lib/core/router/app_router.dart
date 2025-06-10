@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/products/presentation/screens/products_screen.dart';
@@ -7,8 +6,8 @@ import '../../features/products/domain/models/product.dart';
 import '../../features/navigation/presentation/screens/navigation_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
-import '../../features/account/presentation/screens/account_screen.dart';
 import '../../features/auth/presentation/screens/sign_flow_screen.dart';
+import '../../features/auth/presentation/screens/user_dashboard_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -53,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/account',
-            builder: (context, state) => const SignFlowScreen(),
+            builder: (context, state) => const UserDashboardScreen(),
           ),
         ],
       ),

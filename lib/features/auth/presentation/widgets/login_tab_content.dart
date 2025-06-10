@@ -23,15 +23,50 @@ class _LoginTabContentState extends ConsumerState<LoginTabContent> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       ref.read(loginLoadingProvider.notifier).state = true;
-      // TODO: Implement login logic
-      Future.delayed(const Duration(seconds: 2), () {
+
+      try {
+        // Call the login API
+        await ref.read(loginProvider((
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        )).future);
+
+        if (mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login successful! Loading dashboard...'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Trigger welcome animation and invalidate auth providers
+          ref.read(showWelcomeAnimationProvider.notifier).state = true;
+          ref.invalidate(isLoggedInProvider);
+          ref.invalidate(currentUserProvider);
+          ref.invalidate(currentUserIdProvider);
+          ref.invalidate(currentTokenProvider);
+        }
+      } catch (e) {
+        if (mounted) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Login failed: ${e.toString().replaceFirst('Exception: ', '')}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
         if (mounted) {
           ref.read(loginLoadingProvider.notifier).state = false;
         }
-      });
+      }
     }
   }
 

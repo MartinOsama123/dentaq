@@ -13,31 +13,82 @@ class RegisterTabContent extends ConsumerStatefulWidget {
 
 class _RegisterTabContentState extends ConsumerState<RegisterTabContent> {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _usernameController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
+    _mobileController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleRegister() {
+  void _handleRegister() async {
     if (_formKey.currentState!.validate()) {
+      final termsAccepted = ref.read(termsAcceptedProvider);
+      if (!termsAccepted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please accept the Terms & Conditions'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       ref.read(registerLoadingProvider.notifier).state = true;
-      // TODO: Implement register logic
-      Future.delayed(const Duration(seconds: 2), () {
+
+      try {
+        // Call the register API
+        await ref.read(registerProvider((
+          username: _usernameController.text.trim(),
+          password: _passwordController.text,
+          fullName: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          mobile: _mobileController.text.trim(),
+        )).future);
+
+        if (mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Loading dashboard...'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Trigger welcome animation and invalidate auth providers
+          ref.read(showWelcomeAnimationProvider.notifier).state = true;
+          ref.invalidate(isLoggedInProvider);
+          ref.invalidate(currentUserProvider);
+          ref.invalidate(currentUserIdProvider);
+          ref.invalidate(currentTokenProvider);
+        }
+      } catch (e) {
+        if (mounted) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Registration failed: ${e.toString().replaceFirst('Exception: ', '')}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
         if (mounted) {
           ref.read(registerLoadingProvider.notifier).state = false;
         }
-      });
+      }
     }
   }
 
@@ -47,6 +98,7 @@ class _RegisterTabContentState extends ConsumerState<RegisterTabContent> {
     final isConfirmPasswordVisible =
         ref.watch(confirmPasswordVisibilityProvider);
     final isLoading = ref.watch(registerLoadingProvider);
+    final termsAccepted = ref.watch(termsAcceptedProvider);
 
     return Form(
       key: _formKey,
@@ -78,41 +130,39 @@ class _RegisterTabContentState extends ConsumerState<RegisterTabContent> {
 
           const SizedBox(height: 24),
 
-          // First name and last name row
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name',
-                    prefixIcon: Icon(Icons.person_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Required';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name',
-                    prefixIcon: Icon(Icons.person_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Required';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
+          // Username field
+          TextFormField(
+            controller: _usernameController,
+            decoration: const InputDecoration(
+              labelText: 'Username',
+              prefixIcon: Icon(Icons.person_outlined),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a username';
+              }
+              if (value.length < 3) {
+                return 'Username must be at least 3 characters';
+              }
+              return null;
+            },
+          ),
+
+          const SizedBox(height: 16),
+
+          // Full name field
+          TextFormField(
+            controller: _fullNameController,
+            decoration: const InputDecoration(
+              labelText: 'Full Name',
+              prefixIcon: Icon(Icons.person_outlined),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your full name';
+              }
+              return null;
+            },
           ),
 
           const SizedBox(height: 16),
@@ -131,6 +181,27 @@ class _RegisterTabContentState extends ConsumerState<RegisterTabContent> {
               }
               if (!value.contains('@')) {
                 return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+
+          const SizedBox(height: 16),
+
+          // Mobile field
+          TextFormField(
+            controller: _mobileController,
+            decoration: const InputDecoration(
+              labelText: 'Mobile Number',
+              prefixIcon: Icon(Icons.phone_outlined),
+            ),
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your mobile number';
+              }
+              if (value.length < 10) {
+                return 'Please enter a valid mobile number';
               }
               return null;
             },
@@ -207,9 +278,10 @@ class _RegisterTabContentState extends ConsumerState<RegisterTabContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Checkbox(
-                value: true, // TODO: Implement checkbox state
+                value: termsAccepted,
                 onChanged: (value) {
-                  // TODO: Implement checkbox toggle
+                  ref.read(termsAcceptedProvider.notifier).state =
+                      value ?? false;
                 },
                 activeColor: const Color(0xFF044D5E),
               ),
